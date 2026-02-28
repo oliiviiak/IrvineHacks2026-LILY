@@ -31,9 +31,9 @@ tools = [
                         "description": "Time when the photo was taken"
                     }
 
-                }
+                },
+                "required": ["filename"]
             },
-            "required": ["filename"]
         }
     },
 
@@ -92,11 +92,7 @@ tools = [
 ]
 
 
-def extract_text_from_image(image_path: str) -> str:
-    image = Image.open(image_path)
-    return pytesseract.image_to_string(image)
-
-
+# encoding entire image for llm model
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -104,6 +100,12 @@ def encode_image(image_path):
 
 def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
     return f"data:{mime_type};base64,{base64_string}"
+
+
+# extractign text from document image
+def extract_text_from_image(image_path: str) -> str:
+    image = Image.open(image_path)
+    return pytesseract.image_to_string(image)
 
 
 def handle_tool(call):
@@ -152,9 +154,35 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
                 })
         else:
             return msg.content
+        
+
+def document_summary(image_path: str):
+    extracted_text = extract_text_from_image(image_path)
+    image_b64 = encode_image(image_path)
+    
+    prompt = f"""You are a document scanner. Your only job is to report what is physically present in this document.
+
+                <extracted_text>
+                {extracted_text}
+                </extracted_text>
+
+                Using ONLY the extracted text above, provide:
+                1. A summary of each section and what it contains
+                2. Any fields that require action (e.g. signature required, date needed, checkbox unchecked)
+
+                Rules:
+                - Do NOT analyze, interpret, or give opinions
+                - Do NOT add any information not explicitly present in the document
+                - Do NOT make inferences
+                - Only report what is literally there"""
+    
+    return run(prompt, image=image_b64)
+
 
 image_b64 = encode_image("testimg.jpeg")
 res = run("What do you see in this image?", image=image_b64)
 res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+res2 = document_summary("testdocument.jpeg")
 print(res)
 print(res1)
+print(res2)
