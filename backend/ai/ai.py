@@ -1,6 +1,8 @@
 import litellm
 import json
 import base64
+from PIL import Image
+import pytesseract
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -90,6 +92,11 @@ tools = [
 ]
 
 
+def extract_text_from_image(image_path: str) -> str:
+    image = Image.open(image_path)
+    return pytesseract.image_to_string(image)
+
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -97,7 +104,7 @@ def encode_image(image_path):
 
 def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
     return f"data:{mime_type};base64,{base64_string}"
-        
+
 
 def handle_tool(call):
     args = json.loads(call.function.arguments)
