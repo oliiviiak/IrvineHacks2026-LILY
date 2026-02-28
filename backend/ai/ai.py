@@ -82,5 +82,6 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
         else:
             return msg.content
 
-res = run("this is a test run!")
+image_b64 = encode_image("testimg.jpeg")
+res = run("What do you see in this image?", image=image_b64)
 print(res)
