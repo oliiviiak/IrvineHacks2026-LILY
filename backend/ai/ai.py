@@ -14,7 +14,7 @@ tools = [
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
-    
+
     {
         "type": "function",
         "function": {
@@ -37,7 +37,7 @@ def handle_tool(call):
         return
 
 
-def run(user_message, model="anthropic/claude-sonnet-4-5-20250514"):
+def run(user_message, model="anthropic/claude-sonnet-4-5-20250929"):
     messages = [{"role": "user", "content": user_message}]
 
     while True:
@@ -56,7 +56,5 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250514"):
         else:
             return msg.content
 
-# # Swap models with one string change
-# run("Take a photo", model="anthropic/claude-sonnet-4-5-20250514")
-# run("Take a photo", model="gpt-4o")
-# run("Take a photo", model="gemini/gemini-2.0-flash")
+res = run("this is a test run!")
+print(res)
