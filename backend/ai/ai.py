@@ -33,10 +33,11 @@ tools = [
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
-        return image_path.base64.b64encode(image_file.read()).decode('utf-8')
+        return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-
+def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
+    return f"data:{mime_type};base64,{base64_string}"
         
 
 def handle_tool(call):
