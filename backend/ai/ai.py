@@ -1,5 +1,6 @@
 import litellm
 import json
+import base64
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -28,6 +29,15 @@ tools = [
         },
     },
 ]
+
+
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return image_path.base64.b64encode(image_file.read()).decode('utf-8')
+
+
+
+        
 
 def handle_tool(call):
     args = json.loads(call.function.arguments)
