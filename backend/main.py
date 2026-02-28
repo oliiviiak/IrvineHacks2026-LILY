@@ -1,10 +1,23 @@
-from fastapi import FastAPI
-from routes import profile
-import uvicorn
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+from fastapi import FastAPI
+from routes import profile, auth
+import uvicorn
+from db.db import db
+from db import migrations
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    migrations.migrate()
+    yield
+    db.close()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(profile.router)
+app.include_router(auth.router)
+
 
 
 if __name__ == "__main__":
