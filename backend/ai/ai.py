@@ -48,8 +48,12 @@ def handle_tool(call):
         return
 
 
-def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg"):
+def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg", audio_transcript: str = None):
     
+    content = user_message
+    if audio_transcript:
+        content += f"\n\nAudio transcript: {audio_transcript}"
+
     if image:
         content = [
             {
@@ -58,11 +62,11 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
             },
             {
                 "type": "text",
-                "text": user_message
+                "text": content
             }
         ]
     else:
-        content = user_message
+        pass
     
     messages = [{"role": "user", "content": content}]
 
@@ -84,4 +88,6 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
 
 image_b64 = encode_image("testimg.jpeg")
 res = run("What do you see in this image?", image=image_b64)
+res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
 print(res)
+print(res1)
