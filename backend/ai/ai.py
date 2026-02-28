@@ -48,8 +48,23 @@ def handle_tool(call):
         return
 
 
-def run(user_message, model="anthropic/claude-sonnet-4-5-20250929"):
-    messages = [{"role": "user", "content": user_message}]
+def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg"):
+    
+    if image:
+        content = [
+            {
+                "type": "image_url",
+                "image_url": {"url": build_data_url(image, mime_type)}
+            },
+            {
+                "type": "text",
+                "text": user_message
+            }
+        ]
+    else:
+        content = user_message
+    
+    messages = [{"role": "user", "content": content}]
 
     while True:
         response = litellm.completion(model=model, messages=messages, tools=tools)
