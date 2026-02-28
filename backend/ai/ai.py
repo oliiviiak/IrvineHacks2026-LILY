@@ -65,8 +65,6 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
                 "text": content
             }
         ]
-    else:
-        pass
     
     messages = [{"role": "user", "content": content}]
 
