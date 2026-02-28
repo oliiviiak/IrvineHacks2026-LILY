@@ -1,0 +1,62 @@
+import litellm
+import json
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# Works with both providers, same interface
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "contact_caretaker",
+            "description": "Capture a photo from the webcam",
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
+    },
+    
+    {
+        "type": "function",
+        "function": {
+            "name": "record_audio",
+            "description": "Record audio from microphone",
+            "parameters": {
+                "type": "object",
+                "properties": {"duration": {"type": "integer"}},
+                "required": ["duration"],
+            },
+        },
+    },
+]
+
+def handle_tool(call):
+    args = json.loads(call.function.arguments)
+    if call.function.name == "take_photo":
+        return
+    elif call.function.name == "record_audio":
+        return
+
+
+def run(user_message, model="anthropic/claude-sonnet-4-5-20250514"):
+    messages = [{"role": "user", "content": user_message}]
+
+    while True:
+        response = litellm.completion(model=model, messages=messages, tools=tools)
+        msg = response.choices[0].message
+
+        if msg.tool_calls:
+            messages.append(msg)
+            for call in msg.tool_calls:
+                result = handle_tool(call)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": call.id,
+                    "content": str(result),
+                })
+        else:
+            return msg.content
+
+# # Swap models with one string change
+# run("Take a photo", model="anthropic/claude-sonnet-4-5-20250514")
+# run("Take a photo", model="gpt-4o")
+# run("Take a photo", model="gemini/gemini-2.0-flash")
