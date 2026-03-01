@@ -46,7 +46,19 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Inter-VariableFont_opsz,wght.ttf",
+            "./assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf",
+            "./assets/fonts/Satoshi-Variable.ttf",
+            "./assets/fonts/Satoshi-VariableItalic.ttf"
+          ]
+        }
+    
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
