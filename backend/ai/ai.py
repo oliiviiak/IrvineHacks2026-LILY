@@ -7,8 +7,9 @@ import cv2
 import subprocess
 import os
 import datetime
-import db.db as db
+from db.db import db
 import features.create_functions as create_functions
+import uuid
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -257,8 +258,15 @@ def document_summary(image_path: str):
 # res = run("What do you see in this image?", image=image_b64)
 # res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
 # res2 = document_summary("testdocument.jpeg")
-res3 = extract_text_from_image("testdocument.jpeg")
+# res3 = extract_text_from_image("testdocument.jpeg")
 # print(res)
 # print(res1)
-start_conversation("019ca733-1cb6-731d-81d0-339160fda74a")
-print(res3)
+# print(res3)
+
+# run this to create test_user_id
+test_user_id = str(uuid.uuid4())
+db.execute("INSERT INTO users (id, provider, subject) VALUES (?, ?, ?)", (test_user_id, "email", "test@test.com"))
+db.execute("INSERT INTO careneeders (user_id, first_name, last_name) VALUES (?, ?, ?)", (test_user_id, "Test", "User"))
+db.commit()
+
+start_conversation(test_user_id)
