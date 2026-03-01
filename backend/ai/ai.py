@@ -126,7 +126,7 @@ def handle_tool(call):
         aud = cv2.imread("recording.wav")
         return aud
     elif call.function.name == "analyze_document":
-        return
+        return document_summary(img)
     elif call.function.name == "notify_caretaker":
         info = {
             "caretake_notified": args.get("caretaker_notified", {}),
