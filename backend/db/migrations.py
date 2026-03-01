@@ -55,6 +55,15 @@ MIGRATIONS = [
         timestamp TIMESTAMP DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
         message TEXT NOT NULL
     );
+    CREATE TABLE households (
+        household_id TEXT PRIMARY KEY,
+        name TEXT
+    );
+    CREATE TABLE household_members (
+        household_id TEXT NOT NULL REFERENCES households(household_id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        PRIMARY KEY (household_id, user_id)
+    );
     """,
 ]
 def migrate():
