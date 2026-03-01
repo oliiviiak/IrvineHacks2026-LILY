@@ -59,3 +59,19 @@ def add_household_member(household_id: str, user_id: str) -> None:
         (household_id, user_id)
     )
     db.commit()
+
+
+def create_careneeder(user_id: str, first_name: str, last_name: str, pfp: str = None) -> None:
+    db.execute(
+        "INSERT INTO careneeders (user_id, first_name, last_name, pfp) VALUES (?, ?, ?, ?)",
+        (user_id, first_name, last_name, pfp)
+    )
+    db.commit()
+
+
+def create_caretaker(user_id: str, first_name: str, last_name: str, pfp: str = None) -> None:
+    db.execute(
+        "INSERT INTO caretakers (user_id, first_name, last_name, pfp) VALUES (?, ?, ?, ?)",
+        (user_id, first_name, last_name, pfp)
+    )
+    db.commit()
