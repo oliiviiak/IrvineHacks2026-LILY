@@ -23,11 +23,11 @@ def create_alert(doc_id: str, message: str, transcript_item_id: str = None) -> s
     return alert_id
 
 
-def create_document(convo_id: str, overview: str, content: str) -> str:
+def create_document(convo_id: str, overview: str, content: str, url: str = None) -> str:
     document_id = str(uuid.uuid4())
     db.execute(
-        "INSERT INTO documents (document_id, convo_id, overview, content) VALUES (?, ?, ?, ?)",
-        (document_id, convo_id, overview, content)
+        "INSERT INTO documents (document_id, convo_id, url, overview, content) VALUES (?, ?, ?, ?, ?)",
+        (document_id, convo_id, url, overview, content)
     )
     db.commit()
     return document_id
