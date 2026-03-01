@@ -71,7 +71,7 @@ def createUser(provider: str, subject: str) -> str | None:
         INSERT INTO users (id, provider, subject) VALUES (?, ?, ?)
     """
 
-    user_id = str(uuid.uuid7())
+    user_id = str(uuid.uuid4())
     res = db.execute(query, (user_id, provider, subject))
     if res.rowcount == 0:
         return None

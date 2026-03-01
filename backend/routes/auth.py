@@ -17,7 +17,8 @@ async def create_session(req: LoginRequest):
     try:
         token = auth.login(req.provider, req.oauth_code, req.email)
         return {"session_token": token}
-    except:
+    except Exception as e:
+        print (f"{e}")
         raise HTTPException(status_code=400, detail="unable to login")
 
 

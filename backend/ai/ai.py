@@ -97,16 +97,28 @@ def extract_text_from_image(image_path: str) -> str:
     
     lines = {}
     for i, word in enumerate(data["text"]):
-        if word.strip():
-            # use block_num + line_num together as a unique key per line
+        if word.strip() and int(data["conf"][i]) > 0:
             block_line_key = (data["block_num"][i], data["line_num"][i])
             if block_line_key not in lines:
-                lines[block_line_key] = []
-            lines[block_line_key].append(word)
+                lines[block_line_key] = {
+                    "words": [],
+                    "x": data["left"][i],
+                    "y": data["top"][i],
+                    "width": data["width"][i],
+                    "height": data["height"][i]
+                }
+            else:
+                lines[block_line_key]["width"] = (data["left"][i] + data["width"][i]) - lines[block_line_key]["x"]
+            lines[block_line_key]["words"].append(word)
     
     result = ""
-    for global_line_num, (key, words) in enumerate(sorted(lines.items()), start=1):
-        result += f"[LN:{global_line_num}] {' '.join(words)}\n"
+    for global_line_num, (key, line) in enumerate(sorted(lines.items()), start=1):
+        x = line["x"]
+        y = line["y"]
+        w = line["width"]
+        h = line["height"]
+        text = " ".join(line["words"])
+        result += f"[LN:{global_line_num}][{x} {y} {w} {h}] {text}\n"
     
     return result
 
@@ -138,6 +150,7 @@ def handle_tool(call):
 
         print("Notifying caretaker:", json.dumps(info, indent=2))
         return {"status": "success"}
+
 
 def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg", audio_transcript: str = None):
     
@@ -211,6 +224,8 @@ def document_summary(image_path: str):
 # res = run("What do you see in this image?", image=image_b64)
 # res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
 # res2 = document_summary("testdocument.jpeg")
+res3 = extract_text_from_image("testdocument.jpeg")
 # print(res)
 # print(res1)
 # print(res2)
+print(res3)
