@@ -141,6 +141,10 @@ def handle_tool(call):
 
 def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg", audio_transcript: str = None):
     
+    system = """You are LILY, an assistant for caregiving. Only call the notify_caretaker tool if the user
+            explicitly asks you to send an alert or notify their caretaker. Never call it on your own judgment.
+            """
+    
     content = user_message
     if audio_transcript:
         content += f"\n\nAudio transcript: {audio_transcript}"
@@ -157,7 +161,10 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
             }
         ]
     
-    messages = [{"role": "user", "content": content}]
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": content}
+    ]
 
     while True:
         response = litellm.completion(model=model, messages=messages, tools=tools)

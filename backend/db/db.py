@@ -43,3 +43,13 @@ def create_convo(needer_id: str) -> str:
     )
     db.commit()
     return convo_id
+
+
+def create_alert(doc_id: str, message: str, transcript_item_id: str = None) -> str:
+    alert_id = str(uuid.uuid4())
+    db.execute(
+        "INSERT INTO alerts (alert_id, doc_id, transcript_item_id, message) VALUES (?, ?, ?, ?)",
+        (alert_id, doc_id, transcript_item_id, message)
+    )
+    db.commit()
+    return alert_id
