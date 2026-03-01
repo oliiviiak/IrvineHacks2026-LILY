@@ -105,7 +105,22 @@ def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
 # extractign text from document image
 def extract_text_from_image(image_path: str) -> str:
     image = Image.open(image_path)
-    return pytesseract.image_to_string(image)
+    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
+    
+    lines = {}
+    for i, word in enumerate(data["text"]):
+        if word.strip():
+            # use block_num + line_num together as a unique key per line
+            block_line_key = (data["block_num"][i], data["line_num"][i])
+            if block_line_key not in lines:
+                lines[block_line_key] = []
+            lines[block_line_key].append(word)
+    
+    result = ""
+    for global_line_num, (key, words) in enumerate(sorted(lines.items()), start=1):
+        result += f"[LN:{global_line_num}] {' '.join(words)}\n"
+    
+    return result
 
 
 def handle_tool(call):
@@ -180,10 +195,10 @@ def document_summary(image_path: str):
     return run(prompt, image=image_b64)
 
 
-image_b64 = encode_image("testimg.jpeg")
+# image_b64 = encode_image("testimg.jpeg")
 # res = run("What do you see in this image?", image=image_b64)
 # res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
-res2 = document_summary("testdocument.jpeg")
+# res2 = document_summary("testdocument.jpeg")
 # print(res)
 # print(res1)
-print(res2)
+# print(res2)
