@@ -18,7 +18,7 @@ function AppNavigator(){
     if (user.isLoading) return;
 
     router.replace({
-        pathname: user.isLoggedIn ? "/(tabs)" : '/login',
+        pathname: user.isLoggedIn ? "/document" : '/login',
         params: {}
     })
 
@@ -29,6 +29,7 @@ function AppNavigator(){
     <Stack>
         <Stack.Protected guard={user.isLoggedIn}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }}/>
+            <Stack.Screen name="document" options={{ headerShown: false }}/>
         </Stack.Protected>        
         <Stack.Screen name="login" options={{ headerShown: false }} />
     </Stack>
