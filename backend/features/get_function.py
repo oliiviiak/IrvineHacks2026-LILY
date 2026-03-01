@@ -1,13 +1,18 @@
-import os
-import sqlite3
 
-import create_functions
+import sqlite3
+import sys
+import os
+
+import features.create_functions as create_functions
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 db_path = os.path.join(BASE_DIR, "db", "app.db")
 
 connection = sqlite3.connect(db_path)
 connection.row_factory = sqlite3.Row
+connection.execute("PRAGMA foreign_keys = ON")
 
 def get_convo(convo_id):
     cursor = connection.cursor()
@@ -16,7 +21,7 @@ def get_convo(convo_id):
     documents_data = []
 
     # get transcript_items
-    transcript_query = "SELECT * FROM transcript_items WHERE id = ?"
+    transcript_query = "SELECT * FROM transcript_items WHERE convo_id = ?"
     cursor.execute(transcript_query, (convo_id,))
 
     t_result = cursor.fetchone()
@@ -33,7 +38,7 @@ def get_convo(convo_id):
         alerts_data = dict(a_result)
 
     #get documents
-    documents_query = "SELECT * FROM documents WHERE id = ?"
+    documents_query = "SELECT * FROM documents WHERE convo_id = ? ORDER BY created_at ASC"
     cursor.execute(documents_query, (convo_id,))
 
     d_result = cursor.fetchall()
@@ -45,15 +50,15 @@ def get_convo(convo_id):
         "documents": documents_data
     }
 
-
-convo_id = create_functions.create_convo("1")
+"""
+convo_id = create_functions.create_convo("019ca733-1cb6-731d-81d0-339160fda74a")
 doc_id = create_functions.create_document(convo_id, "doc summary!!", "contentnntnntn")
 trans_id = create_functions.create_transcript_item(convo_id, "izzy", "transcirptcnotentntntn")
 alert_id = create_functions.create_alert(doc_id, "hi!!", trans_id)
 
 answer = get_convo(convo_id)
 
-print("transcript: " + answer["transcripts"])
-print("alerst: " + answer["alerts"])
-print("documents: " + answer["documents"])
-    
+print("transcript: " + str(answer["transcripts"]))
+print("alerst: " + str(answer["alerts"]))
+print("documents: " + str(answer["documents"]))
+"""
