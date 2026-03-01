@@ -6,6 +6,15 @@ import os
 
 router = APIRouter(prefix="/document", tags=["document"])
 
+
+def upload_to_s3(file_path: str, filename: str) -> str:
+    # TODO: replace with real S3 bucket
+    # s3 = boto3.client("s3")
+    # s3.upload_file(file_path, "bucket name", filename)
+    # return f"https://your-bucket-name.s3.amazonaws.com/{filename}"
+    return f"placeholder_url/{filename}"
+
+
 @router.post("/")
 async def upload_document(convo_id: str, file: UploadFile = File(...)):
     # save image locally temporarily
