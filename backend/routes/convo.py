@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from db.db import create_convo
+from features.create_functions import create_convo
 
 router = APIRouter(prefix="/convo", tags=["convo"])
 
