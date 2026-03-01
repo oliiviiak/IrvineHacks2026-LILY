@@ -167,7 +167,8 @@ def document_summary(image_path: str):
                 </extracted_text>
 
                 Using ONLY the extracted text above, provide:
-                1. A summary of each section and what it contains
+                1. The heading for section and what it contains
+                2. A concise summary of the most import sections
                 2. Any fields that require action (e.g. signature required, date needed, checkbox unchecked)
 
                 Rules:
@@ -180,9 +181,9 @@ def document_summary(image_path: str):
 
 
 image_b64 = encode_image("testimg.jpeg")
-res = run("What do you see in this image?", image=image_b64)
-res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+# res = run("What do you see in this image?", image=image_b64)
+# res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
 res2 = document_summary("testdocument.jpeg")
-print(res)
-print(res1)
+# print(res)
+# print(res1)
 print(res2)
