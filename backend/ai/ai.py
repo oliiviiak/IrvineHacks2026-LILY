@@ -1,10 +1,11 @@
 import litellm
 import json
 import base64
+from PIL import Image
+import pytesseract
 import cv2
 import subprocess
 import os
-
 import datetime
 
 from dotenv import load_dotenv
@@ -79,6 +80,7 @@ tools = [
 ]
 
 
+# encoding entire image for llm model
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
@@ -86,7 +88,28 @@ def encode_image(image_path):
 
 def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
     return f"data:{mime_type};base64,{base64_string}"
-        
+
+
+# extractign text from document image
+def extract_text_from_image(image_path: str) -> str:
+    image = Image.open(image_path)
+    data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
+    
+    lines = {}
+    for i, word in enumerate(data["text"]):
+        if word.strip():
+            # use block_num + line_num together as a unique key per line
+            block_line_key = (data["block_num"][i], data["line_num"][i])
+            if block_line_key not in lines:
+                lines[block_line_key] = []
+            lines[block_line_key].append(word)
+    
+    result = ""
+    for global_line_num, (key, words) in enumerate(sorted(lines.items()), start=1):
+        result += f"[LN:{global_line_num}] {' '.join(words)}\n"
+    
+    return result
+
 
 def handle_tool(call):
     args = json.loads(call.function.arguments)
@@ -151,10 +174,36 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
                 })
         else:
             return msg.content
+        
 
-#image_b64 = encode_image("testimg.jpeg")
-#res = run("What do you see in this image?", image=image_b64)
-#res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+def document_summary(image_path: str):
+    extracted_text = extract_text_from_image(image_path)
+    image_b64 = encode_image(image_path)
+    
+    prompt = f"""You are a document scanner. Your only job is to report what is physically present in this document.
 
-res = run("record audio for 10 secs")
-print(res)
+                <extracted_text>
+                {extracted_text}
+                </extracted_text>
+
+                Using ONLY the extracted text above, provide:
+                1. The heading for section and what it contains
+                2. A concise summary of the most import sections
+                2. Any fields that require action (e.g. signature required, date needed, checkbox unchecked)
+
+                Rules:
+                - Do NOT analyze, interpret, or give opinions
+                - Do NOT add any information not explicitly present in the document
+                - Do NOT make inferences
+                - Only report what is literally there"""
+    
+    return run(prompt, image=image_b64)
+
+
+# image_b64 = encode_image("testimg.jpeg")
+# res = run("What do you see in this image?", image=image_b64)
+# res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+# res2 = document_summary("testdocument.jpeg")
+# print(res)
+# print(res1)
+# print(res2)
