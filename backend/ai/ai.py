@@ -1,6 +1,11 @@
 import litellm
 import json
 import base64
+import cv2
+import subprocess
+import os
+
+import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,25 +19,6 @@ tools = [
             "description": "Capture a photo from the webcam",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
-    },
-
-    {
-        "type": "function",
-        "function": {
-            "name": "upload_photo",
-            "description": "Uploads a photo to the app",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "timestamp": {
-                        "type": "string",
-                        "description": "Time when the photo was taken"
-                    }
-
-                }
-            },
-            "required": ["filename"]
-        }
     },
 
     {
@@ -56,9 +42,9 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "filename": {"type": "string"}
+                    "text": {"type": "string"}
                 },
-                "required": ["filename"]
+                "required": ["text"]
             }
         }
     },
@@ -71,6 +57,9 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties":{
+                    "caretaker_notified": {
+                        "type": "object"
+                    },
                     "document_type": {
                         "type": "string"
                     },
@@ -82,7 +71,7 @@ tools = [
                         "enum": ["low", "medium", "high"]
                     }
                 },
-                "required": ["document_type", "summary", "urgency"]
+                "required": ["document_type", "summary", "urgency", "caretaker_notified"]
             }
         }
     }
@@ -102,13 +91,30 @@ def build_data_url(base64_string: str, mime_type: str = "image/jpeg") -> str:
 def handle_tool(call):
     args = json.loads(call.function.arguments)
     if call.function.name == "take_photo":
-        return
+        micro_main = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../microcontroller/main.py"))
+        subprocess.run(["python3", micro_main])
+        img = cv2.imread("photo.jpg")
+        if img is None:
+            return "Failed to load image"
+        return img
     elif call.function.name == "record_audio":
-        return
+        micro_main = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../microcontroller/main.py"))
+        subprocess.run(["python3", micro_main])
+        aud = cv2.imread("recording.wav")
+        return aud
     elif call.function.name == "analyze_document":
         return
     elif call.function.name == "notify_caretaker":
-        return
+        info = {
+            "caretake_notified": args.get("caretaker_notified", {}),
+            "document_type": args["document_type"],
+            "summary": args["summary"],
+            "urgency": args["urgency"],
+            "timestamp": str(datetime.datetime.now())
+        }
+
+        print("Notifying caretaker:", json.dumps(info, indent=2))
+        return {"status": "success"}
 
 def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str = None, mime_type: str = "image/jpeg", audio_transcript: str = None):
     
@@ -146,8 +152,9 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
         else:
             return msg.content
 
-image_b64 = encode_image("testimg.jpeg")
-res = run("What do you see in this image?", image=image_b64)
-res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+#image_b64 = encode_image("testimg.jpeg")
+#res = run("What do you see in this image?", image=image_b64)
+#res1 = run("what do you hear?", audio_transcript="hello hello can you hear me")
+
+res = run("record audio for 10 secs")
 print(res)
-print(res1)
