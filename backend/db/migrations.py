@@ -65,6 +65,26 @@ MIGRATIONS = [
         PRIMARY KEY (household_id, user_id)
     );
     """,
+    
+    # 001 - mock data for demo (fixed UUIDs so re-running is safe)
+    """
+    INSERT OR IGNORE INTO users (id, provider, subject) VALUES
+        ('00000000-0000-0000-0000-000000000001', 'email', 'gertrude@demo.com'),
+        ('00000000-0000-0000-0000-000000000002', 'email', 'carol@demo.com');
+
+    INSERT OR IGNORE INTO careneeders (user_id, first_name, last_name) VALUES
+        ('00000000-0000-0000-0000-000000000001', 'Gertrude', 'Washington');
+
+    INSERT OR IGNORE INTO caretakers (user_id, first_name, last_name) VALUES
+        ('00000000-0000-0000-0000-000000000002', 'Carol', 'Washington');
+
+    INSERT OR IGNORE INTO households (household_id, name) VALUES
+        ('00000000-0000-0000-0000-000000000010', 'Washington Family');
+
+    INSERT OR IGNORE INTO household_members (household_id, user_id) VALUES
+        ('00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001'),
+        ('00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000002');
+    """,
 ]
 def migrate():
     

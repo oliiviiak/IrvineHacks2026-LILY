@@ -1,64 +1,32 @@
-
-import sqlite3
-import sys
-import os
-
-import features.create_functions as create_functions
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# backend/features/get_function.py
+from db.db import db
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-db_path = os.path.join(BASE_DIR, "db", "app.db")
+def get_convo(convo_id: str):
+    # All transcript items
+    transcripts = [dict(r) for r in db.execute(
+        "SELECT * FROM transcript_items WHERE convo_id = ? ORDER BY timestamp ASC",
+        (convo_id,)
+    ).fetchall()]
 
-connection = sqlite3.connect(db_path)
-connection.row_factory = sqlite3.Row
-connection.execute("PRAGMA foreign_keys = ON")
+    # All documents
+    documents = [dict(r) for r in db.execute(
+        "SELECT * FROM documents WHERE convo_id = ? ORDER BY created_at ASC",
+        (convo_id,)
+    ).fetchall()]
 
-def get_convo(convo_id):
-    cursor = connection.cursor()
-    transcript_data = {}
-    alerts_data = {}
-    documents_data = []
-
-    # get transcript_items
-    transcript_query = "SELECT * FROM transcript_items WHERE convo_id = ?"
-    cursor.execute(transcript_query, (convo_id,))
-
-    t_result = cursor.fetchone()
-    if t_result:
-        transcript_data = dict(t_result)
-
-    # get alerts
-    transcript_item_id = transcript_data["transcript_item_id"]
-    alert_query = "SELECT * FROM alerts WHERE transcript_item_id = ?"
-    cursor.execute(alert_query, (transcript_item_id, ))
-    
-    a_result = cursor.fetchone()
-    if a_result:
-        alerts_data = dict(a_result)
-
-    #get documents
-    documents_query = "SELECT * FROM documents WHERE convo_id = ? ORDER BY created_at ASC"
-    cursor.execute(documents_query, (convo_id,))
-
-    d_result = cursor.fetchall()
-    documents_data = [dict(d) for d in d_result] if d_result else []
+    # All alerts across all documents in this convo
+    alerts = []
+    if documents:
+        doc_ids = [d["document_id"] for d in documents]
+        placeholders = ",".join("?" * len(doc_ids))
+        alerts = [dict(r) for r in db.execute(
+            f"SELECT * FROM alerts WHERE doc_id IN ({placeholders}) ORDER BY timestamp ASC",
+            doc_ids
+        ).fetchall()]
 
     return {
-        "transcripts": transcript_data,
-        "alerts": alerts_data,
-        "documents": documents_data
+        "transcripts": transcripts,
+        "alerts": alerts,
+        "documents": documents,
     }
-
-"""
-convo_id = create_functions.create_convo("019ca733-1cb6-731d-81d0-339160fda74a")
-doc_id = create_functions.create_document(convo_id, "doc summary!!", "contentnntnntn")
-trans_id = create_functions.create_transcript_item(convo_id, "izzy", "transcirptcnotentntntn")
-alert_id = create_functions.create_alert(doc_id, "hi!!", trans_id)
-
-answer = get_convo(convo_id)
-
-print("transcript: " + str(answer["transcripts"]))
-print("alerst: " + str(answer["alerts"]))
-print("documents: " + str(answer["documents"]))
-"""
