@@ -1,5 +1,6 @@
 import uuid
 from db.db import db
+import time
 
 
 def create_convo(needer_id: str) -> str:
@@ -30,3 +31,13 @@ def create_document(convo_id: str, overview: str, content: str) -> str:
     )
     db.commit()
     return document_id
+
+
+def create_transcript_item(convo_id: str, speaker: str, content: str) -> str:
+    transcript_item_id = str(uuid.uuid4())
+    db.execute(
+        "INSERT INTO transcript_items (transcript_item_id, convo_id, speaker, timestamp, content) VALUES (?, ?, ?, ?, ?)",
+        (transcript_item_id, convo_id, speaker, time.time(), content)
+    )
+    db.commit()
+    return transcript_item_id

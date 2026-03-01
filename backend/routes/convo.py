@@ -9,5 +9,5 @@ class CreateConvoRequest(BaseModel):
 
 @router.post("/")
 def create_convo_route(req: CreateConvoRequest):
-    convo_id = create_convo(req.careneeder_id)
+    convo_id = create_convo(req.needer_id)
     return {"convo_id": convo_id}
