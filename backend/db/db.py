@@ -1,6 +1,7 @@
 # db.py
 import sqlite3
 from pathlib import Path
+import uuid
 
 DB_PATH = Path("./db/app.db")
 
@@ -32,3 +33,13 @@ class Database:
         self.conn.close()
 
 db = Database.get()
+
+
+def create_convo(needer_id: str) -> str:
+    convo_id = str(uuid.uuid4())
+    db.execute(
+        "INSERT INTO conversations (convo_id, needer_id) VALUES (?, ?)",
+        (convo_id, needer_id)
+    )
+    db.commit()
+    return convo_id

@@ -5,6 +5,7 @@ from routes import profile, auth
 import uvicorn
 from db.db import db
 from db import migrations
+from routes import convo
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,7 +18,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(profile.router)
 app.include_router(auth.router)
-
+app.include_router(convo.router)
 
 
 if __name__ == "__main__":
