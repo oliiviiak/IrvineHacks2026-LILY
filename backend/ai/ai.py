@@ -263,10 +263,11 @@ def document_summary(image_path: str):
 # print(res1)
 # print(res3)
 
-# run this to create test_user_id
-test_user_id = str(uuid.uuid4())
-db.execute("INSERT INTO users (id, provider, subject) VALUES (?, ?, ?)", (test_user_id, "email", "test@test.com"))
-db.execute("INSERT INTO careneeders (user_id, first_name, last_name) VALUES (?, ?, ?)", (test_user_id, "Test", "User"))
-db.commit()
+if __name__ == "__main__":
+    # run this to create test_user_id
+    test_user_id = str(uuid.uuid4())
+    db.execute("INSERT INTO users (id, provider, subject) VALUES (?, ?, ?)", (test_user_id, "email", "test@test.com"))
+    db.execute("INSERT INTO careneeders (user_id, first_name, last_name) VALUES (?, ?, ?)", (test_user_id, "Test", "User"))
+    db.commit()
 
-start_conversation(test_user_id)
+    start_conversation(test_user_id)

@@ -3,16 +3,22 @@ from features.create_functions import create_document
 from ai.ai import document_summary
 import shutil
 import os
+import boto3
 
 router = APIRouter(prefix="/document", tags=["document"])
 
 
 def upload_to_s3(file_path: str, filename: str) -> str:
-    # TODO: replace with real S3 bucket
-    # s3 = boto3.client("s3")
-    # s3.upload_file(file_path, "bucket name", filename)
-    # return f"https://your-bucket-name.s3.amazonaws.com/{filename}"
-    return f"placeholder_url/{filename}"
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+    )
+    bucket_name = os.getenv("AWS_BUCKET_NAME")
+    
+    s3.upload_file(file_path, bucket_name, filename)
+    
+    return f"https://{bucket_name}.s3.amazonaws.com/{filename}"
 
 
 @router.post("/")
