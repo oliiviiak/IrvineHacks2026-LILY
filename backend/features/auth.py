@@ -97,8 +97,6 @@ def createSession(id: str) -> str:
     return token
 
 
-
-
 def create_session_token() -> tuple[bytes, bytes]:
     raw = os.urandom(32)
     hash_ = hash_token(raw)

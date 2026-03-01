@@ -10,4 +10,3 @@ class CreateProfileRequest(BaseModel):
 @router.post("/")
 async def create_profile(req: CreateProfileRequest):
     return {"status": "ok"}
-
