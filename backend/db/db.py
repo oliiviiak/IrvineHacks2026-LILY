@@ -1,6 +1,8 @@
 # db.py
 import sqlite3
 from pathlib import Path
+import uuid
+import datetime
 
 DB_PATH = Path("./db/app.db")
 

@@ -7,6 +7,8 @@ import cv2
 import subprocess
 import os
 import datetime
+import db.db as db
+import features.create_functions as create_functions
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -113,23 +115,29 @@ def extract_text_from_image(image_path: str) -> str:
 
 def handle_tool(call):
     args = json.loads(call.function.arguments)
+    base_dir = os.path.dirname(__file__)
+
     if call.function.name == "take_photo":
         micro_main = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../microcontroller/main.py"))
         subprocess.run(["python3", micro_main])
         img = cv2.imread("photo.jpg")
         if img is None:
             return "Failed to load image"
-        return img
+        return "photo.jpg"
     elif call.function.name == "record_audio":
-        micro_main = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../microcontroller/main.py"))
-        subprocess.run(["python3", micro_main])
-        aud = cv2.imread("recording.wav")
-        return aud
+        duration = args.get("duration", 5)
+        micro_main = os.path.abspath(os.path.join(base_dir, "../../microcontroller/main.py"))
+        subprocess.run(["python3", micro_main, "--duration", str(duration)])
+        
+        if os.path.exists("recording.wav"):
+            return f"Audio recorded for {duration} seconds and saved as recording.wav."
+        return "Error: Microphone failed to record."
     elif call.function.name == "analyze_document":
-        return document_summary(img)
+        text = args["text"]
+        return document_summary(text)
     elif call.function.name == "notify_caretaker":
         info = {
-            "caretake_notified": args.get("caretaker_notified", {}),
+            "caretakre_notified": args.get("caretaker_notified", {}),
             "document_type": args["document_type"],
             "summary": args["summary"],
             "urgency": args["urgency"],
@@ -182,6 +190,31 @@ def run(user_message, model="anthropic/claude-sonnet-4-5-20250929", image: str =
         else:
             return msg.content
         
+def start_conversation(needer_id: str):
+    convo_id = create_functions.create_convo(needer_id)
+    
+    print("Say 'hi lily' to start...")
+    
+    while True:
+        user_input = input("You: ")
+        
+        if "bye lily" in user_input.lower():
+            print("Lily: Goodbye!")
+            break
+        
+        if "hi lily" in user_input.lower():
+            print("Lily: Hi! How can I help you?")
+            continue
+        
+        create_functions.create_transcript_item(convo_id, "careneder", user_input)
+        
+        lily_response = run(user_input)
+        
+        create_functions.create_transcript_item(convo_id, "LILY", lily_response)
+        
+        print(f"Lily: {lily_response}")
+    
+    return convo_id
 
 def document_summary(image_path: str):
     extracted_text = extract_text_from_image(image_path)
@@ -213,4 +246,4 @@ def document_summary(image_path: str):
 # res2 = document_summary("testdocument.jpeg")
 # print(res)
 # print(res1)
-# print(res2)
+start_conversation("019ca733-1cb6-731d-81d0-339160fda74a")
