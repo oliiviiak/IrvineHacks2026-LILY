@@ -18,6 +18,7 @@ class CreateProfileRequest(BaseModel):
 async def create_profile(req: CreateProfileRequest):
     return {"status": "ok"}
 
+
 class UserCaretaker:
     def __init__(self, user_id, first_name, last_name, pfp):
         self.user_id = user_id

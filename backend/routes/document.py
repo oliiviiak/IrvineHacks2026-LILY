@@ -1,14 +1,25 @@
-from fastapi import APIRouter, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, UploadFile, File
+from features.create_functions import create_document
+from ai.ai import document_summary
+import shutil
+import os
 
 router = APIRouter(prefix="/document", tags=["document"])
 
-class CreateDocumentRequest(BaseModel):
-    image: str
-    audio: str
-
 @router.post("/")
-async def create_document(req: CreateDocumentRequest):
-    
-    return {"status": "ok"}
+async def upload_document(convo_id: str, file: UploadFile = File(...)):
+    # save image locally temporarily
+    file_path = f"uploads/{file.filename}"
+    os.makedirs("uploads", exist_ok=True)
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
 
+    overview = document_summary(file_path)
+
+    document_id = create_document(
+        convo_id=convo_id,
+        overview=overview,
+        content=overview
+    )
+
+    return {"document_id": document_id}
