@@ -4,7 +4,6 @@
     "strict": true,
     "jsx": "react-native",
     "lib": ["es6"],
-    "types": ["react-native"],
     "paths": {
       "@/*": [
         "./*"
