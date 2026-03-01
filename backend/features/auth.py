@@ -7,7 +7,7 @@ from db.db import db
 import os
 import hashlib
 
-def Login(provider: str, oauth_code: str, local_email: str) -> str:
+def login(provider: str, oauth_code: str, local_email: str) -> str:
 
     match provider:
         case "email":
@@ -71,7 +71,7 @@ def createUser(provider: str, subject: str) -> str | None:
         INSERT INTO users (id, provider, subject) VALUES (?, ?, ?)
     """
 
-    user_id = str(uuid.uuid7())
+    user_id = str(uuid.uuid71())
     res = db.execute(query, (user_id, provider, subject))
     if res.rowcount == 0:
         return None

@@ -15,7 +15,7 @@ class LoginRequest(BaseModel):
 @router.post("/session")
 async def create_session(req: LoginRequest):
     try:
-        token = auth.Login(req.provider, req.oauth_code, req.email)
+        token = auth.login(req.provider, req.oauth_code, req.email)
         return {"session_token": token}
     except:
         raise HTTPException(status_code=400, detail="unable to login")
